@@ -5,14 +5,17 @@ import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 import { LuCheckCircle } from "react-icons/lu";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { useTasksContext } from "../hooks/useTasksContext";
 
-const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
+const PendingTasks = ({
+    tasks,
+    idToModifyNull,
+    changeIdToModify,
+    handleTriggerEffect,
+}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [idToModify, setIdToModify] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const { dispatch } = useTasksContext();
 
     const handleDelete = async (task) => {
         try {
@@ -29,14 +32,13 @@ const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
 
             const data = await response.json();
 
-            dispatch({ type: "DELETE_TASK", payload: data });
+            handleTriggerEffect();
         } catch (error) {
             console.log(error);
         }
     };
 
     const toCompleting = async (task) => {
-        dispatch({ type: "UPDATE_TASK", payload: { ...task, complete: true } });
         try {
             const response = await fetch(
                 `https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/${task.ToDoid.N}`,
@@ -54,13 +56,13 @@ const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
             }
 
             const data = await response.json();
+            handleTriggerEffect();
         } catch (error) {
             console.error(error);
         }
     };
 
     const toModify = async (task, obj) => {
-        dispatch({ type: "UPDATE_TASK", payload: { ...task, ...obj } });
         try {
             const response = await fetch(
                 `https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/${task.ToDoid.N}`,
@@ -78,6 +80,7 @@ const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
             }
 
             const data = await response.json();
+            handleTriggerEffect();
         } catch (error) {
             console.log(error);
         }
@@ -183,7 +186,7 @@ const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
                                         <form className="flex justify-between gap-16 my-auto">
                                             <input
                                                 type="text"
-                                                placeholder={task.title.s}
+                                                placeholder={task.title.S}
                                                 value={title}
                                                 onChange={(e) =>
                                                     setTitle(e.target.value)
@@ -230,6 +233,7 @@ const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
                                         />
                                     </div>
                                 </div>
+
                                 <div className="tracking-widest pb-2 text-xs text-gray-500 ml-4">
                                     <p>
                                         {formatDistanceToNow(

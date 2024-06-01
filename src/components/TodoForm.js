@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useTasksContext } from "../hooks/useTasksContext";
 
-const TodoForm = ({ baseUrl, user }) => {
+const TodoForm = ({ handleTriggerEffect }) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [error, setError] = useState(null);
-    const { dispatch } = useTasksContext();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -26,7 +24,8 @@ const TodoForm = ({ baseUrl, user }) => {
             }
 
             const data = await response.json();
-            dispatch({ type: "CREATE_TASK", payload: data });
+
+            handleTriggerEffect();
             setTitle("");
             setDescription("");
             setError(null);

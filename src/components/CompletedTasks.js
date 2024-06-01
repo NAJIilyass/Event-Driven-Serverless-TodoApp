@@ -4,12 +4,10 @@ import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 import { BsXCircle } from "react-icons/bs";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { useTasksContext } from "../hooks/useTasksContext";
 import axios from "axios";
 
-const CompletedTasks = ({ tasks }) => {
+const CompletedTasks = ({ tasks, handleTriggerEffect }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const { dispatch } = useTasksContext();
 
     const handleDelete = async (task) => {
         try {
@@ -22,17 +20,13 @@ const CompletedTasks = ({ tasks }) => {
             }
 
             const data = response.data;
-            dispatch({ type: "DELETE_TASK", payload: data });
+            handleTriggerEffect();
         } catch (error) {
             console.log(error);
         }
     };
 
     const toPending = async (task) => {
-        dispatch({
-            type: "UPDATE_TASK",
-            payload: { ...task, complete: false },
-        });
         try {
             const response = await axios.patch(
                 `https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/${task.ToDoid.N}`,
@@ -49,6 +43,7 @@ const CompletedTasks = ({ tasks }) => {
             }
 
             const data = response.data;
+            handleTriggerEffect();
         } catch (error) {
             console.error(error);
         }

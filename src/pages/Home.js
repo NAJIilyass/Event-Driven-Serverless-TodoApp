@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import CompletedTasks from "../components/CompletedTasks";
 import PendingTasks from "../components/PendingTasks";
 import TodoForm from "../components/TodoForm";
-import { useTasksContext } from "../hooks/useTasksContext";
 
 const Home = () => {
-    const { tasks, dispatch } = useTasksContext();
+    const [tasks, setTasks] = useState([]);
     const [idToModifyNull, setIdToModifyNull] = useState("");
+    const [triggerEffect, setTriggerEffect] = useState(false);
+
+    const handleTriggerEffect = () => {
+        setTriggerEffect(!triggerEffect);
+    };
 
     useEffect(() => {
         const getTasks = async () => {
@@ -20,13 +24,13 @@ const Home = () => {
                 }
 
                 const data = await response.json();
-                dispatch({ type: "SET_TASKS", payload: data });
+                setTasks(data);
             } catch (error) {
                 console.error("Error fetching tasks:", error);
             }
         };
         getTasks();
-    }, [dispatch]);
+    }, [triggerEffect]);
 
     const handleOutsideClick = (event) => {
         if (!event.target.closest(".modifying-container")) {
@@ -42,15 +46,19 @@ const Home = () => {
         <div onClick={handleOutsideClick}>
             <div className="grid grid-cols-8 m-10">
                 <div className="col-span-2 mt-20">
-                    <TodoForm />
+                    <TodoForm handleTriggerEffect={handleTriggerEffect} />
                 </div>
                 <div className="col-span-6 pl-12 flex flex-col gap-16">
                     <PendingTasks
                         tasks={tasks}
                         idToModifyNull={idToModifyNull}
                         changeIdToModify={changeIdToModify}
+                        handleTriggerEffect={handleTriggerEffect}
                     />
-                    <CompletedTasks tasks={tasks} />
+                    <CompletedTasks
+                        tasks={tasks}
+                        handleTriggerEffect={handleTriggerEffect}
+                    />
                 </div>
             </div>
         </div>
