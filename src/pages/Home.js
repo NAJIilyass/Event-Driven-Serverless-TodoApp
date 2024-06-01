@@ -2,30 +2,31 @@ import React, { useEffect, useState } from "react";
 import CompletedTasks from "../components/CompletedTasks";
 import PendingTasks from "../components/PendingTasks";
 import TodoForm from "../components/TodoForm";
-import axios from "axios";
 import { useTasksContext } from "../hooks/useTasksContext";
 
 const Home = () => {
-    const baseUrl = "http://localhost:4000";
     const { tasks, dispatch } = useTasksContext();
     const [idToModifyNull, setIdToModifyNull] = useState("");
 
-    // useEffect(() => {
-    //     const getTasks = async () => {
-    //         try {
-    //             const response = await axios.get(`${baseUrl}/api/tasks`, {
-    //                 headers: {
-    //                     Authorization: `Bearer ${user.token}`,
-    //                 },
-    //             });
-    //             const data = response.data;
-    //             dispatch({ type: "SET_TASKS", payload: data });
-    //         } catch (error) {
-    //             console.error("Error fetching task:", error);
-    //         }
-    //     };
-    //     getTasks();
-    // }, [dispatch]);
+    useEffect(() => {
+        const getTasks = async () => {
+            try {
+                const response = await fetch(
+                    "https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                }
+
+                const data = await response.json();
+                dispatch({ type: "SET_TASKS", payload: data });
+            } catch (error) {
+                console.error("Error fetching tasks:", error);
+            }
+        };
+        getTasks();
+    }, [dispatch]);
 
     const handleOutsideClick = (event) => {
         if (!event.target.closest(".modifying-container")) {
@@ -41,16 +42,15 @@ const Home = () => {
         <div onClick={handleOutsideClick}>
             <div className="grid grid-cols-8 m-10">
                 <div className="col-span-2 mt-20">
-                    <TodoForm baseUrl={baseUrl} />
+                    <TodoForm />
                 </div>
                 <div className="col-span-6 pl-12 flex flex-col gap-16">
                     <PendingTasks
-                        baseUrl={baseUrl}
                         tasks={tasks}
                         idToModifyNull={idToModifyNull}
                         changeIdToModify={changeIdToModify}
                     />
-                    <CompletedTasks baseUrl={baseUrl} tasks={tasks} />
+                    <CompletedTasks tasks={tasks} />
                 </div>
             </div>
         </div>

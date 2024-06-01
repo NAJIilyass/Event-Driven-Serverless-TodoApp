@@ -1,37 +1,39 @@
 import { useState } from "react";
-import axios from "axios";
 import { useTasksContext } from "../hooks/useTasksContext";
 
-const TodoForm = ({ baseUrl }) => {
+const TodoForm = ({ baseUrl, user }) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [error, setError] = useState(null);
     const { dispatch } = useTasksContext();
 
     const handleSubmit = async (e) => {
-        // e.preventDefault();
-        // try {
-        //     const createdTask = await axios.post(
-        //         `${baseUrl}/api/tasks`,
-        //         {
-        //             title,
-        //             description,
-        //         },
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${user.token}`,
-        //             },
-        //         }
-        //     );
-        //     const data = createdTask.data;
-        //     dispatch({ type: "CREATE_TASK", payload: data });
-        //     setTitle("");
-        //     setDescription("");
-        //     setError(null);
-        // } catch (error) {
-        //     setError(error);
-        //     console.log(error);
-        // }
+        e.preventDefault();
+        try {
+            const response = await fetch(
+                "https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ title, description }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+            dispatch({ type: "CREATE_TASK", payload: data });
+            setTitle("");
+            setDescription("");
+            setError(null);
+        } catch (error) {
+            setError(error.message);
+            console.log(error);
+        }
     };
 
     return (

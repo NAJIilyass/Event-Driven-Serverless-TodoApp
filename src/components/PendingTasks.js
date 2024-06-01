@@ -4,11 +4,10 @@ import { FaPencil } from "react-icons/fa6";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoIosArrowUp } from "react-icons/io";
 import { LuCheckCircle } from "react-icons/lu";
-import axios from "axios";
-import { useTasksContext } from "../hooks/useTasksContext";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { useTasksContext } from "../hooks/useTasksContext";
 
-const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
+const PendingTasks = ({ tasks, idToModifyNull, changeIdToModify }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [idToModify, setIdToModify] = useState("");
     const [title, setTitle] = useState("");
@@ -16,64 +15,72 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
     const { dispatch } = useTasksContext();
 
     const handleDelete = async (task) => {
-        // try {
-        //     const deletedTask = await axios.delete(
-        //         `${baseUrl}/api/tasks/${task._id}`,
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${user.token}`,
-        //             },
-        //         }
-        //     );
-        //     const data = deletedTask.data;
-        //     dispatch({ type: "DELETE_TASK", payload: data });
-        // } catch (error) {
-        //     console.log(error);
-        // }
+        try {
+            const response = await fetch(
+                `https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/${task.ToDoid.N}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+
+            dispatch({ type: "DELETE_TASK", payload: data });
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const toCompleting = async (task) => {
-        // if (!user) {
-        //     return;
-        // }
-        // dispatch({ type: "UPDATE_TASK", payload: { ...task, complete: true } });
-        // try {
-        //     const updatedTask = await axios.patch(
-        //         `${baseUrl}/api/tasks/${task._id}`,
-        //         {
-        //             complete: true,
-        //         },
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${user.token}`,
-        //             },
-        //         }
-        //     );
-        //     const data = updatedTask.data;
-        // } catch (error) {
-        //     console.error(error);
-        // }
+        dispatch({ type: "UPDATE_TASK", payload: { ...task, complete: true } });
+        try {
+            const response = await fetch(
+                `https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/${task.ToDoid.N}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ complete: true }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const toModify = async (task, obj) => {
-        // if (!user) {
-        //     return;
-        // }
-        // dispatch({ type: "UPDATE_TASK", payload: { ...task, obj } });
-        // try {
-        //     const updatedTask = await axios.patch(
-        //         `${baseUrl}/api/tasks/${task._id}`,
-        //         obj,
-        //         {
-        //             headers: {
-        //                 Authorization: `Bearer ${user.token}`,
-        //             },
-        //         }
-        //     );
-        //     const data = updatedTask.data;
-        // } catch (error) {
-        //     console.log(error);
-        // }
+        dispatch({ type: "UPDATE_TASK", payload: { ...task, ...obj } });
+        try {
+            const response = await fetch(
+                `https://lkx2nweek8.execute-api.us-east-1.amazonaws.com/${task.ToDoid.N}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(obj),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     useEffect(() => {
@@ -90,7 +97,7 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
 
                 let task1 = null;
                 for (const task of tasks) {
-                    if (task._id === idToModify) {
+                    if (task.ToDoid.N === idToModify) {
                         task1 = task;
                     }
                 }
@@ -119,11 +126,14 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
 
     return (
         <div className="mx-6">
+            {/*Title*/}
             <div>
                 <p className="text-3xl font-bold text-orange-500 mb-4 select-none">
                     Pending Tasks
                 </p>
             </div>
+
+            {/*Arrow*/}
             <div
                 onClick={() => {
                     setIsDropdownOpen(!isDropdownOpen);
@@ -140,38 +150,40 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
                 </div>
             </div>
 
+            {/*Content*/}
             {isDropdownOpen &&
                 tasks?.map(
                     (task) =>
-                        !task.complete && (
+                        task.complete &&
+                        !task.complete.BOOL && (
                             <div
-                                key={task._id}
+                                key={task.ToDoid.N}
                                 className={
-                                    idToModify === task._id
+                                    idToModify === task.ToDoid.N
                                         ? "bg-white rounded-lg mb-4 modifying-container cursor-pointer"
                                         : "bg-white rounded-lg mb-4"
                                 }
                             >
                                 <div className="flex justify-between gap-8 p-4">
-                                    {idToModify !== task._id && (
+                                    {idToModify !== task.ToDoid.N && (
                                         <div className="flex justify-between gap-16 my-auto">
                                             <div className="w-24">
                                                 <p className="w-full overflow-hidden font-semibold text-lg">
-                                                    {task.title}
+                                                    {task.title.S}
                                                 </p>
                                             </div>
                                             <div className="w-auto">
                                                 <p className="text-gray-500 w-full overflow-x-hidden text-justify mr-16">
-                                                    {task.description}
+                                                    {task.description.S}
                                                 </p>
                                             </div>
                                         </div>
                                     )}
-                                    {idToModify === task._id && (
+                                    {idToModify === task.ToDoid.N && (
                                         <form className="flex justify-between gap-16 my-auto">
                                             <input
                                                 type="text"
-                                                placeholder={task.title}
+                                                placeholder={task.title.s}
                                                 value={title}
                                                 onChange={(e) =>
                                                     setTitle(e.target.value)
@@ -180,7 +192,7 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
                                             />
                                             <input
                                                 type="text"
-                                                placeholder={task.description}
+                                                placeholder={task.description.S}
                                                 value={description}
                                                 onChange={(e) =>
                                                     setDescription(
@@ -204,7 +216,7 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
                                         <FaPencil
                                             size={16}
                                             onClick={() =>
-                                                setIdToModify(task._id)
+                                                setIdToModify(task.ToDoid.N)
                                             }
                                             className="mt-1 cursor-pointer text-blue-600 opacity-50 hover:opacity-100"
                                         />
@@ -221,7 +233,7 @@ const PendingTasks = ({ baseUrl, tasks, idToModifyNull, changeIdToModify }) => {
                                 <div className="tracking-widest pb-2 text-xs text-gray-500 ml-4">
                                     <p>
                                         {formatDistanceToNow(
-                                            new Date(task.createdAt),
+                                            new Date(task.createdAt.S),
                                             { addSuffix: true }
                                         )}
                                     </p>
